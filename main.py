@@ -20,10 +20,12 @@ def executesql(data, config=db_config):
     "INSERT INTO GFxPRoduction (Machine, Part, PerpetualCount, Timestamp)"
     "VALUES (%s, %s, %s, %s)"
     )
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     try:
         # Executing the SQL command
         cursor.execute(insert_stmt, data)
+        print(now, " Data inserted", data)
         
         # Commit your changes in the database
         conn.commit()
@@ -31,8 +33,8 @@ def executesql(data, config=db_config):
     except:
         # Rolling back in case of error
         conn.rollback()
+        print(dt, " Data insert failed", data)
 
-    print("Data inserted", data)
     conn.close()
 
 def poll_count(client):
@@ -43,13 +45,15 @@ def poll_count(client):
         return (regs[1]*65536)+regs[0]
         
     else:
-        print("Error reaching module")
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(now, " Error reaching module")
+        time.sleep(20)
         return None
 
 last_count = -1
 
 # TCP auto connect on modbus request, close after it
-c = ModbusClient(host="10.4.42.169", auto_open=True, auto_close=True)
+c = ModbusClient(host="10.4.42.168", auto_open=True, auto_close=True, timeout=5)
 
 while True:
     count = poll_count(c)
