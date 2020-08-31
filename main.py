@@ -53,12 +53,12 @@ def poll_count(client):
 last_count = -1
 
 # TCP auto connect on modbus request, close after it
-c = ModbusClient(host="10.4.42.168", auto_open=True, auto_close=True, timeout=5)
+c = ModbusClient(host="10.4.42.169", auto_open=True, auto_close=True, timeout=5)
 
 while True:
     count = poll_count(c)
 
-    if (not last_count):        # no response from unit
+    if (not count):        # no response from unit
         pass
     elif (last_count == -1):    # first pass through
         last_count = count
