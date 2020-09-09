@@ -39,35 +39,44 @@ def executesql(data, config=db_config):
 
 def poll_count(client):
 
-    regs = c.read_holding_registers(0, 2)
+    regs = c.read_holding_registers(16, 4)
+
+    di8 = regs[0] + (regs[1]*65536)
+    di9 = regs[2] + (regs[3]*65536)
     
     if regs:
-        return (regs[1]*65536)+regs[0]
+        return di8, di9
         
     else:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(now, " Error reaching module")
         time.sleep(20)
-        return None
+        return None, None
 
-last_count = -1
+last_count8 = -1
+last_count9 = -1
 
 # TCP auto connect on modbus request, close after it
-c = ModbusClient(host="10.4.42.168", auto_open=True, auto_close=True, timeout=5)
+c = ModbusClient(host="10.4.42.169", auto_open=True, auto_close=True, timeout=5)
 
 while True:
-    count = poll_count(c)
+    count8, count9 = poll_count(c)
 
-    if (not last_count):        # no response from unit
+    if (not count8):        # no response from unit
         pass
-    elif (last_count == -1):    # first pass through
-        last_count = count
-    elif (count > last_count):  # one or more parts made
-
-        for entry in range(last_count+1, count+1):
-            data = ('920', '50-1467', entry, time.time())
+    elif (last_count8 == -1):    # first pass through
+        last_count8 = count8
+        last_count9 = count9
+    if (count8 > last_count8):  # one or more parts made on left arm
+        for entry in range(last_count8+1, count8+1):
+            data = ('650L', '50-1467', entry, time.time())
             executesql(data)
-        last_count = count
+        last_count8 = count8
+    if (count9 > last_count9):  # one or more parts made on left arm
+        for entry in range(last_count9+1, count9+1):
+            data = ('650R', '50-1467', entry, time.time())
+            executesql(data)
+        last_count9 = count9
 
     time.sleep(2.5)
 
