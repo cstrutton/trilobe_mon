@@ -62,7 +62,11 @@ c = ModbusClient(host="10.4.42.169", auto_open=True, auto_close=True, timeout=5)
 while True:
     count8, count9 = poll_count(c)
 
+<<<<<<< HEAD
     if (not count8):        # no response from unit
+=======
+    if (not count):        # no response from unit
+>>>>>>> 747ac9a7d2bb2a49c16b665250e7b00447a18ea0
         pass
     elif (last_count8 == -1):    # first pass through
         last_count8 = count8
